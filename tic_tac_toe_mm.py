@@ -6,13 +6,12 @@ class Tic_Tac_Toe:
         self.hu_player = "O"
         self.comp_player = "X"
 
-    def find_available(self, board):
+    def find_available(self):
         available_squares = []
         for i in self.square:
-            if isinstance(i, int):
-                available_squares.append(board[i])
+            if i != "X" and i != "O":
+                available_squares.append(self.square[i])
         return available_squares
-
 
     def make_move_comp(self, i, move, player_move):
         """
@@ -244,7 +243,10 @@ while True:
             move, _ = board.make_move(tiles, move, player_move)
         draw_moves()
         # Check if there's a winner and what line it's on
-        line, game_over = board.check_win()
+        if move:
+            line, game_over = board.check_win("O")
+        else:
+            line, game_over = board.check_win("X")
         draw_win()
     # This is for playing against computer
     if game_state == "game_comp_x" or game_state == "game_comp_o":
