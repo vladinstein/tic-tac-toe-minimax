@@ -15,10 +15,9 @@ class Tic_Tac_Toe:
         return available_squares
 
     def minimax(self, player):
-        new_board = deepcopy(self)
-        available_moves = new_board.find_available()
-        _, win_comp = new_board.check_win(board.comp_player)
-        _, win_human = new_board.check_win(board.hu_player)
+        available_moves = self.find_available()
+        _, win_comp = self.check_win(board.comp_player)
+        _, win_human = self.check_win(board.hu_player)
         if win_comp:
             return [None, 10]
         elif win_human:
@@ -29,14 +28,14 @@ class Tic_Tac_Toe:
         for i in available_moves:
             move = [0, 0]
             move[0] = i
-            new_board.square[i] = player
+            self.square[i] = player
             if player == board.comp_player:
-                result = new_board.minimax(board.hu_player)
+                result = self.minimax(board.hu_player)
                 move[1] = result[1]
             else:
-                result = new_board.minimax(board.comp_player)
+                result = self.minimax(board.comp_player)
                 move[1] = result[1]
-            new_board.square[i] = move[0]
+            self.square[i] = move[0]
             moves.append(move)
         if player == board.hu_player:
             max_score = 10000
@@ -56,7 +55,6 @@ class Tic_Tac_Toe:
         """
         Function that makes a move for computer.
         """
-        pygame.time.wait(500)
         if self.comp_player == "X":
             self.square[i] = "X"
         else:
@@ -296,9 +294,7 @@ while True:
         elif not game_over and not draw and not player_move:
             # Winning move (computer) if there is one.
             coords = board.minimax(board.comp_player)
-            print(coords)
             move, player_move = board.make_move_comp(coords[0], move, player_move)
-            print(move, player_move)
         draw_moves()
         # Check if there's a winner and what line it's on
         if move:
