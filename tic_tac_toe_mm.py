@@ -15,41 +15,46 @@ class Tic_Tac_Toe:
         return available_squares
 
     def minimax(self, player):
+        """
+        Minimax algorithm function.
+        """
+        # Check for available moves
         available_moves = self.find_available()
+        # See if there's a win or a draw and return values accordingly
         _, win_comp = self.check_win(board.comp_player)
         _, win_human = self.check_win(board.hu_player)
         if win_comp:
-            return [None, 10]
+            return None, 10
         elif win_human:
-            return [None, - 10]
+            return None, - 10
         elif len(available_moves) == 0:
-            return [None, 0]
-        moves = []
+            return None, 0
+        # Dictionary: key is a move index, value is a value of a branch (10 / -10 / 0).
+        moves = {}
+        # Call minimax on all available slots for a different player.
         for i in available_moves:
-            move = [0, 0]
-            move[0] = i
             self.square[i] = player
             if player == board.comp_player:
                 result = self.minimax(board.hu_player)
-                move[1] = result[1]
+                moves[i] = result[1]
             else:
                 result = self.minimax(board.comp_player)
-                move[1] = result[1]
-            self.square[i] = move[0]
-            moves.append(move)
+                moves[i] = result[1]
+            self.square[i] = i
+        # Calculation of the best moves.  
         if player == board.hu_player:
             max_score = 10000
-            for num, i in enumerate(moves):
-                if i[1] < max_score:
-                    max_score = i[1]
-                    max_index = num
+            for i in moves:
+                if moves[i] < max_score:
+                    max_score = moves[i]
+                    max_index = i
         else:
             max_score = - 10000
-            for num, i in enumerate(moves):
-                if i[1] > max_score:
-                    max_score = i[1]
-                    max_index = num
-        return moves[max_index]     
+            for i in moves:
+                if moves[i] > max_score:
+                    max_score = moves[i]
+                    max_index = i
+        return max_index, moves[max_index]     
         
     def make_move_comp(self, i, move, player_move):
         """
@@ -293,8 +298,8 @@ while True:
             move, player_move = board.make_move(tiles, move, player_move)
         elif not game_over and not draw and not player_move:
             # Winning move (computer) if there is one.
-            coords = board.minimax(board.comp_player)
-            move, player_move = board.make_move_comp(coords[0], move, player_move)
+            move_coord = board.minimax(board.comp_player)
+            move, player_move = board.make_move_comp(move_coord[0], move, player_move)
         draw_moves()
         # Check if there's a winner and what line it's on
         if move:
