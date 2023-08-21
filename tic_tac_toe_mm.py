@@ -1,4 +1,4 @@
-import sys, pygame
+import sys, pygame, random
 from copy import deepcopy
 
 class Tic_Tac_Toe:
@@ -29,7 +29,7 @@ class Tic_Tac_Toe:
             return None, - 10
         elif len(available_moves) == 0:
             return None, 0
-        # Dictionary: key is a move index, value is a value of a branch (10 / -10 / 0).
+        # Dictionary: key is a move index, value is a score of a branch (10 / -10 / 0).
         moves = {}
         # Call minimax on all available slots for a different player.
         for i in available_moves:
@@ -41,7 +41,7 @@ class Tic_Tac_Toe:
                 result = self.minimax(board.comp_player)
                 moves[i] = result[1]
             self.square[i] = i
-        # Calculation of the best moves.  
+        # Calculation for choosing the move with the best score.  
         if player == board.hu_player:
             max_score = 10000
             for i in moves:
@@ -137,6 +137,7 @@ game_state = "start_menu"
 game_over = False
 draw = False
 player_move = True
+first_move = True
 
 def draw_menu():
     """
@@ -296,10 +297,18 @@ while True:
         # Player's move
         if not game_over and not draw and player_move:
             move, player_move = board.make_move(tiles, move, player_move)
+            if first_move:
+                first_move = False
         elif not game_over and not draw and not player_move:
-            # Winning move (computer) if there is one.
-            move_coord = board.minimax(board.comp_player)
-            move, player_move = board.make_move_comp(move_coord[0], move, player_move)
+            # First move computer
+            if first_move:
+                first_move_squares = [0, 2, 6, 8]
+                move, player_move = board.make_move_comp(random.choice(first_move_squares), move, player_move)
+                first_move = False
+            else:
+            # Minimax compter for any other move
+                move_coord = board.minimax(board.comp_player)
+                move, player_move = board.make_move_comp(move_coord[0], move, player_move)
         draw_moves()
         # Check if there's a winner and what line it's on
         if move:
