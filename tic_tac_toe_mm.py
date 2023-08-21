@@ -1,10 +1,11 @@
 import sys, pygame
+from copy import deepcopy
 
 class Tic_Tac_Toe:
     def __init__(self):
         self.square = list(range(0, 9))
-        self.hu_player = "O"
         self.comp_player = "X"
+        self.hu_player = "O"
 
     def find_available(self):
         available_squares = []
@@ -13,18 +14,55 @@ class Tic_Tac_Toe:
                 available_squares.append(self.square[i])
         return available_squares
 
+    def minimax(self, player):
+        new_board = deepcopy(self)
+        available_moves = new_board.find_available()
+        _, win_comp = new_board.check_win(board.comp_player)
+        _, win_human = new_board.check_win(board.hu_player)
+        if win_comp:
+            return [None, 10]
+        elif win_human:
+            return [None, - 10]
+        elif len(available_moves) == 0:
+            return [None, 0]
+        moves = []
+        for i in available_moves:
+            move = [0, 0]
+            move[0] = i
+            new_board.square[i] = player
+            if player == board.comp_player:
+                result = new_board.minimax(board.hu_player)
+                move[1] = result[1]
+            else:
+                result = new_board.minimax(board.comp_player)
+                move[1] = result[1]
+            new_board.square[i] = move[0]
+            moves.append(move)
+        if player == board.hu_player:
+            max_score = 10000
+            for num, i in enumerate(moves):
+                if i[1] < max_score:
+                    max_score = i[1]
+                    max_index = num
+        else:
+            max_score = - 10000
+            for num, i in enumerate(moves):
+                if i[1] > max_score:
+                    max_score = i[1]
+                    max_index = num
+        return moves[max_index]     
+        
     def make_move_comp(self, i, move, player_move):
         """
         Function that makes a move for computer.
         """
-        if self.square[i] == 0:
-            pygame.time.wait(500)
-            if move == True:
-                self.square[i] = "X"
-            else:
-                self.square[i] = "O"
-            move = not move
-            player_move = not player_move
+        pygame.time.wait(500)
+        if self.comp_player == "X":
+            self.square[i] = "X"
+        else:
+            self.square[i] = "O"
+        move = not move
+        player_move = not player_move
         return move, player_move
 
     def make_move(self, tiles, move, player_move):
@@ -33,7 +71,7 @@ class Tic_Tac_Toe:
         """
         # i-th square
         for i in range(9):
-            if tiles[i].collidepoint(x, y) and isinstance(self.square[i], int):
+            if tiles[i].collidepoint(x, y) and self.square[i] != "X" and self.square[i] != "O":
                 if move == True and player_move == True:
                     # Add first player's move to the list.
                     self.square[i] = "X"
@@ -70,7 +108,7 @@ class Tic_Tac_Toe:
 
     def check_draw(self):
         for i in range(9):
-            if self.square[i] == 0:
+            if self.square[i] != "X" and self.square[i] != "O":
                 return False
         return True
 
@@ -228,11 +266,11 @@ while True:
             x = y = -1
         if button_1.collidepoint(x, y) and game_state == "choose_menu":
             game_state = "game_comp_x"
+            board.comp_player = "O"
+            board.hu_player = "X"
             x = y = -1
         if button_2.collidepoint(x, y) and game_state == "choose_menu":
             game_state = "game_comp_o"
-            board.comp_player = "O"
-            board.hu_player = "X"
             x = y = -1
             player_move = False
     # Playing with each other.
@@ -257,10 +295,16 @@ while True:
             move, player_move = board.make_move(tiles, move, player_move)
         elif not game_over and not draw and not player_move:
             # Winning move (computer) if there is one.
-            pass
+            coords = board.minimax(board.comp_player)
+            print(coords)
+            move, player_move = board.make_move_comp(coords[0], move, player_move)
+            print(move, player_move)
         draw_moves()
         # Check if there's a winner and what line it's on
-        line, game_over = board.check_win()
+        if move:
+            line, game_over = board.check_win("O")
+        else:
+            line, game_over = board.check_win("X")
         draw = board.check_draw()
         draw_win()
 
